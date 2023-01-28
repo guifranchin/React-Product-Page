@@ -12,14 +12,17 @@ export const Home = () => {
     isFetching,
     fetchNextPage,
     isSuccess,
+    error
   } = useInfiniteQuery(
     ["products", { limit }],
     ({ pageParam }) => getProducts(limit, pageParam),
     {
       keepPreviousData: true,
-      getNextPageParam: (lastPage, pages) => {
-        console.log(lastPage);
-        return lastPage.next_cursor;
+      getNextPageParam: (lastPage) => {
+        if (lastPage && lastPage.next_cursor) {
+          return lastPage.next_cursor;
+        }
+        return null;
       },
     }
   );
@@ -30,6 +33,9 @@ export const Home = () => {
         <h1>Carregando!</h1>
       </>
     );
+  }
+  if(error){
+    return <h1>Error: {error.message}</h1>
   }
 
   return (
@@ -53,15 +59,17 @@ export const Home = () => {
           </div>
         </div>
       </div>
-      <div className="flex flex-grow-1 justify-center">
-        <button
-          type="button"
-          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 "
-          onClick={() => fetchNextPage()}
-        >
-          CARREGA
-        </button>
-      </div>
+      {data?.hasMore && (
+        <div className="flex flex-grow-1 justify-center">
+          <button
+            type="button"
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 "
+            onClick={() => fetchNextPage()}
+          >
+            CARREGA MAIS
+          </button>
+        </div>
+      )}
     </div>
   );
 };
